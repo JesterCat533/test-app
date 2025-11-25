@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>E621 Viewer</title>
+    <title>e126</title>
     <style>
         * {
             margin: 0;
@@ -29,6 +29,58 @@
             height: 100vh;
             position: relative;
             overflow: hidden;
+        }
+        
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        
+        .loading-screen.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+        
+        .loading-title {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            background: linear-gradient(45deg, #ff0050, #00f2ea);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .loading-bar-container {
+            width: 200px;
+            height: 4px;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .loading-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0050, #00f2ea);
+            width: 0%;
+            animation: loading 2s ease-in-out forwards;
+        }
+        
+        @keyframes loading {
+            0% { width: 0%; }
+            100% { width: 100%; }
         }
         
         .feed-container {
@@ -212,9 +264,6 @@
         .sidebar-icon {
             width: 35px;
             height: 35px;
-            background-color: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -222,8 +271,7 @@
         }
         
         .sidebar-btn.liked .sidebar-icon {
-            background-color: rgba(255,0,100,0.3);
-            border: 2px solid #ff0050;
+            color: #ff0050;
         }
         
         .sidebar-count {
@@ -333,11 +381,15 @@
         
         .settings-section {
             margin-bottom: 25px;
+            background-color: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
         }
         
         .settings-section h3 {
             margin-bottom: 15px;
             font-size: 18px;
+            color: #00f2ea;
         }
         
         .tag-input {
@@ -345,7 +397,7 @@
             padding: 12px;
             background-color: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 8px;
+            border-radius: 25px;
             color: white;
             margin-bottom: 10px;
             font-size: 16px;
@@ -372,6 +424,26 @@
             cursor: pointer;
             font-weight: bold;
             font-size: 16px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #ff0050, #00f2ea);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,0,80,0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,0,0,0.3);
         }
         
         .warning {
@@ -760,9 +832,104 @@
             80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
         }
+        
+        .post-detail-view {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            z-index: 400;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        
+        .post-detail-view.active {
+            display: flex;
+        }
+        
+        .post-detail-header {
+            position: sticky;
+            top: 0;
+            height: 60px;
+            background-color: rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 10;
+        }
+        
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .post-detail-title {
+            flex: 1;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .post-detail-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .post-detail-media {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+        }
+        
+        .post-detail-info {
+            width: 100%;
+            padding: 20px;
+            background-color: rgba(0,0,0,0.5);
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        
+        .post-detail-actions {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+        
+        .post-detail-btn {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #ff0050, #00f2ea);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-title">e126</div>
+        <div class="loading-bar-container">
+            <div class="loading-bar"></div>
+        </div>
+    </div>
+    
     <div class="app-container">
         <!-- Preloaded media container (hidden) -->
         <div id="preloadedMedia" class="preloaded-media"></div>
@@ -795,6 +962,30 @@
             </div>
         </div>
         
+        <!-- Post Detail View -->
+        <div id="postDetailView" class="post-detail-view">
+            <div class="post-detail-header">
+                <button class="back-btn" onclick="closePostDetail()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+                    </svg>
+                </button>
+                <div class="post-detail-title">Post Details</div>
+                <div style="width: 40px;"></div>
+            </div>
+            <div class="post-detail-content">
+                <img id="postDetailMedia" class="post-detail-media" src="" alt="">
+                <div class="post-detail-info">
+                    <div id="postDetailDescription" class="post-description"></div>
+                    <div id="postDetailTags" class="post-tags"></div>
+                    <div class="post-detail-actions">
+                        <button class="post-detail-btn" onclick="openInBrowser()">Open in Browser</button>
+                        <button class="post-detail-btn" onclick="downloadPost()">Download</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Navigation Bar -->
         <div class="nav-bar">
             <div id="feedNav" class="nav-item active">
@@ -811,7 +1002,7 @@
             </div>
             <div id="settingsNav" class="nav-item">
                 <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                    <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.04,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.07,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
                 </svg>
                 <span class="nav-label">Settings</span>
             </div>
@@ -832,19 +1023,19 @@
             <div class="settings-section">
                 <h3>Search Tags</h3>
                 <input id="tagsInput" type="text" class="tag-input" placeholder="Enter tags separated by spaces">
-                <button id="applyTags" class="control-btn" style="width: auto; padding: 0 20px;">Apply Tags</button>
+                <button id="applyTags" class="btn">Apply Tags</button>
             </div>
             
             <div class="settings-section">
                 <h3>Blacklist</h3>
                 <input id="blacklistInput" type="text" class="tag-input" placeholder="Add blacklist tag">
-                <button id="addBlacklist" class="control-btn" style="width: auto; padding: 0 20px;">Add to Blacklist</button>
+                <button id="addBlacklist" class="btn">Add to Blacklist</button>
                 <div id="blacklistList" class="tag-list"></div>
             </div>
             
             <div class="settings-section">
                 <h3>Storage</h3>
-                <button id="clearLiked" class="control-btn" style="width: auto; padding: 0 20px; background-color: rgba(255,0,0,0.3);">Clear All Liked Posts</button>
+                <button id="clearLiked" class="btn btn-secondary">Clear All Liked Posts</button>
             </div>
         </div>
         
@@ -919,10 +1110,13 @@
         let lastTap = 0;
         let tapTimeout = null;
         let currentPlayingVideo = null;
+        let currentDetailPost = null;
         
         // DOM elements
+        const loadingScreen = document.getElementById('loadingScreen');
         const mainView = document.getElementById('mainView');
         const likedView = document.getElementById('likedView');
+        const postDetailView = document.getElementById('postDetailView');
         const feedContainer = document.getElementById('feedContainer');
         const likedPostsGrid = document.getElementById('likedPostsGrid');
         const settingsPanel = document.getElementById('settingsPanel');
@@ -949,6 +1143,11 @@
         
         // Initialize app
         function init() {
+            // Hide loading screen after animation completes
+            setTimeout(() => {
+                loadingScreen.classList.add('hidden');
+            }, 2000);
+            
             // Load settings from localStorage
             const savedTags = localStorage.getItem('e621_tags');
             const savedBlacklist = localStorage.getItem('e621_blacklist');
@@ -1056,6 +1255,9 @@
             
             // Scroll event handling
             feedContainer.addEventListener('scroll', handleScroll);
+            
+            // Set up double-tap on the entire app container
+            setupDoubleTap(document.querySelector('.app-container'));
         }
         
         function showSwipeHint() {
@@ -1076,6 +1278,7 @@
             // Hide all views
             mainView.style.display = 'none';
             likedView.style.display = 'none';
+            postDetailView.style.display = 'none';
             settingsPanel.classList.remove('active');
             
             switch(view) {
@@ -1210,11 +1413,6 @@
             
             // Load media for visible posts
             loadVisibleMedia();
-            
-            // Add double-tap listeners to post media containers
-            document.querySelectorAll('.post-media-container').forEach(container => {
-                setupDoubleTap(container);
-            });
         }
         
         function setupDoubleTap(element) {
@@ -1227,7 +1425,7 @@
                 if (tapLength < 500 && tapLength > 0) {
                     // Double tap detected
                     event.preventDefault();
-                    const postId = parseInt(element.dataset.postId);
+                    const postId = currentPostId;
                     handleDoubleTap(postId, element);
                 }
                 
@@ -1352,7 +1550,7 @@
                     mediaContainer.innerHTML = '';
                     mediaContainer.appendChild(video);
                     
-                    // Only play if this is the current video
+                    // Only play if this is current video
                     if (post.id === currentPostId) {
                         video.play().catch(e => console.log('Auto-play prevented:', e));
                         currentPlayingVideo = video;
@@ -1462,6 +1660,9 @@
                 });
             }
             
+            // Sort liked posts by date (newest first)
+            likedPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
             localStorage.setItem('e621_liked', JSON.stringify(likedPosts));
             updateLikeButton();
         }
@@ -1494,6 +1695,41 @@
         function openShare(postId, url) {
             currentPostId = postId;
             shareModal.classList.add('active');
+        }
+        
+        function openPostDetail(postId) {
+            const post = likedPosts.find(p => p.id === postId);
+            if (!post) return;
+            
+            currentDetailPost = post;
+            
+            // Set post detail content
+            document.getElementById('postDetailMedia').src = post.url;
+            document.getElementById('postDetailDescription').textContent = post.description || 'No description available';
+            document.getElementById('postDetailTags').innerHTML = post.tags.map(tag => `<span class="tag">#${tag}</span>`).join('');
+            
+            // Show post detail view
+            postDetailView.classList.add('active');
+        }
+        
+        function closePostDetail() {
+            postDetailView.classList.remove('active');
+            currentDetailPost = null;
+        }
+        
+        function openInBrowser() {
+            if (currentDetailPost) {
+                window.open(`https://e621.net/posts/${currentDetailPost.id}`, '_blank');
+            }
+        }
+        
+        function downloadPost() {
+            if (currentDetailPost) {
+                const link = document.createElement('a');
+                link.href = currentDetailPost.url;
+                link.download = `e621_${currentDetailPost.id}.${currentDetailPost.url.split('.').pop()}`;
+                link.click();
+            }
         }
         
         function shareToClipboard() {
@@ -1538,7 +1774,7 @@
                 `;
             } else {
                 likedPostsGrid.innerHTML = likedPosts.map(post => `
-                    <div class="liked-post-item" onclick="window.open('${post.url}', '_blank')">
+                    <div class="liked-post-item" onclick="openPostDetail(${post.id})">
                         <img src="${post.preview}" alt="Post ${post.id}">
                         <div class="liked-post-overlay">
                             <div>Score: ${post.score} | ${post.rating.toUpperCase()}</div>
